@@ -16,6 +16,7 @@ class NewsApplication : Application() {
         RuntimeContext(
             bgDispatcher = Dispatchers.IO,
             mainDispatcher = Dispatchers.Main,
+            computationDispatcher = Dispatchers.Default,
             newsService = newsService
         )
     }
