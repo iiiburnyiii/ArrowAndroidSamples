@@ -1,14 +1,14 @@
 buildscript {
-  ext.kotlinVersion = '1.3.50'
-  ext.arrowVersion = '0.10.2'
+  ext.kotlinVersion = '1.4.10'
+  ext.arrowVersion = '0.11.0'
   ext.picassoVersion = '2.71828'
-  ext.coroutinesVersion = '1.2.1'
-  ext.appCompatVersion = '1.1.0'
+  ext.coroutinesVersion = '1.3.7'
+  ext.appCompatVersion = '1.2.0'
   ext.constraintLayoutVersion = '1.1.3'
   ext.recyclerViewVersion = '1.1.0-rc01'
-  ext.materialVersion = '1.2.0-alpha01'
+  ext.materialVersion = '1.2.1'
   ext.cardViewVersion = '1.0.0'
-  ext.retrofitVersion = '2.6.2'
+  ext.retrofitVersion = '2.9.0'
   ext.moshiVersion = '1.8.0'
   ext.hiroakiVersion = '0.1.0'
   ext.mockWebServerVersion = '3.12.0'
@@ -30,7 +30,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.5.2'
+    classpath 'com.android.tools.build:gradle:4.0.2'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
   }
