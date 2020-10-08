@@ -11,16 +11,15 @@ buildscript {
   }
 }
 
-apply plugin: 'kotlin-kapt'
 apply from: rootProject.file('gradle/generated-kotlin-sources.gradle')
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'io.gitlab.arturbosch.detekt'
+apply plugin: 'kotlin-kapt'
 
 android {
   compileSdkVersion compileVersion
-  buildToolsVersion build_tools_version
 
   defaultConfig {
     applicationId appId
@@ -42,12 +41,16 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
   }
 
   lintOptions {
     abortOnError false
+  }
+
+  kotlinOptions {
+    jvmTarget = "1.8"
   }
 }
 
@@ -75,14 +78,14 @@ dependencies {
   implementation "com.squareup.moshi:moshi:$moshiVersion"
   implementation "com.squareup.moshi:moshi-kotlin:$moshiVersion"
 
-  kapt "io.arrow-kt:arrow-meta:$arrowVersion"
-  implementation "io.arrow-kt:arrow-core:$arrowVersion"
   implementation "io.arrow-kt:arrow-fx:$arrowVersion"
+  implementation "io.arrow-kt:arrow-syntax:$arrowVersion"
+  kapt    "io.arrow-kt:arrow-meta:$arrowVersion"
 
   testImplementation "me.jorgecastillo:hiroaki-core:$hiroakiVersion"
   testImplementation "com.squareup.okhttp3:mockwebserver:$mockWebServerVersion"
   testImplementation "junit:junit:$junitVersion"
-  testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2'
+  testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.9'
   testImplementation "io.arrow-kt:arrow-core:$arrowVersion"
   testImplementation "io.arrow-kt:arrow-fx:$arrowVersion"
 }
