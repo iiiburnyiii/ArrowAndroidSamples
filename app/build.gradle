@@ -78,8 +78,12 @@ dependencies {
   implementation "com.squareup.moshi:moshi:$moshiVersion"
   implementation "com.squareup.moshi:moshi-kotlin:$moshiVersion"
 
+  implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
+  implementation "androidx.core:core-ktx:$ktxCoreVersion"
+
   implementation "io.arrow-kt:arrow-fx:$arrowVersion"
   implementation "io.arrow-kt:arrow-syntax:$arrowVersion"
+  implementation "io.arrow-kt:arrow-fx-kotlinx-coroutines:$arrowVersion"
   kapt    "io.arrow-kt:arrow-meta:$arrowVersion"
 
   testImplementation "me.jorgecastillo:hiroaki-core:$hiroakiVersion"
