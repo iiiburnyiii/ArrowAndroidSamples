@@ -23,7 +23,7 @@ android {
 
   defaultConfig {
     applicationId appId
-    minSdkVersion minSdk
+    minSdkVersion minSdkV
     targetSdkVersion targetSdk
     versionCode version_code
     versionName version_name

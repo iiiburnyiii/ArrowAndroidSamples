@@ -1,6 +1,8 @@
 package com.github.jorgecastillo.kotlinandroid.io.algebras.business.model
 
-data class NewsItem(
+typealias Articles = List<Article>
+
+data class Article(
     val source: String,
     val author: String?,
     val title: String,

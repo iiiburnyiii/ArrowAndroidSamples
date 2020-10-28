@@ -1,11 +1,12 @@
 package com.github.jorgecastillo.kotlinandroid.io.algebras.ui
 
 import android.content.Context
+import android.util.Log
 import arrow.Kind
-import com.github.jorgecastillo.kotlinandroid.io.algebras.business.getNewsItemDetails
 import com.github.jorgecastillo.kotlinandroid.io.algebras.business.getNews
+import com.github.jorgecastillo.kotlinandroid.io.algebras.business.getNewsItemDetails
+import com.github.jorgecastillo.kotlinandroid.io.algebras.business.model.Article
 import com.github.jorgecastillo.kotlinandroid.io.algebras.business.model.DomainError
-import com.github.jorgecastillo.kotlinandroid.io.algebras.business.model.NewsItem
 import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model.NewsItemViewState
 import com.github.jorgecastillo.kotlinandroid.io.runtime.context.Runtime
 
@@ -49,19 +50,27 @@ private fun displayErrors(
 ): Unit {
     when (DomainError.fromThrowable(t)) {
         is DomainError.NotFoundError -> view.showNotFoundError()
-        is DomainError.UnknownServerError -> view.showGenericError()
+        is DomainError.UnknownError -> view.showGenericError()
         is DomainError.AuthenticationError -> view.showAuthenticationError()
+        is DomainError.EmptyError -> view.showGenericError()
     }
 }
 
-fun <F> Runtime<F>.getAllNews(view: NewsListView): Kind<F, Unit> = fx.concurrent {
+fun <F> Runtime<F>.getAllNews(view: NewsListView): Kind<F, Unit> = bindingConcurrent {
     !effect { view.showLoading() }
     val maybeNews = !getNews().attempt()
+    continueOn(ctx.mainDispatcher)
     !effect { view.hideLoading() }
     !effect {
         maybeNews.fold(
-            ifLeft = { displayErrors(view, it) },
-            ifRight = { view.drawNews(it.map { newsItem -> newsItem.toViewState() }) }
+            ifLeft = {
+                Log.w("Pres", "News error: $it")
+                displayErrors(view, it)
+            },
+            ifRight = {
+                Log.d("Pres", "News: $it")
+                view.drawNews(it.map { newsItem -> newsItem.toViewState() })
+            }
         )
     }
 }
@@ -69,9 +78,10 @@ fun <F> Runtime<F>.getAllNews(view: NewsListView): Kind<F, Unit> = fx.concurrent
 fun <F> Runtime<F>.getNewsItemDetails(
     title: String,
     view: NewsItemDetailView
-): Kind<F, Unit> = fx.concurrent {
+): Kind<F, Unit> = bindingConcurrent {
     !effect { view.showLoading() }
     val maybeNewsItem = !getNewsItemDetails(title).attempt()
+    continueOn(ctx.mainDispatcher)
     !effect { view.hideLoading() }
     !effect {
         maybeNewsItem.fold(
@@ -81,7 +91,7 @@ fun <F> Runtime<F>.getNewsItemDetails(
     }
 }
 
-fun NewsItem.toViewState() = NewsItemViewState(
+fun Article.toViewState() = NewsItemViewState(
     title = title,
     author = author,
     photoUrl = urlToImage,

@@ -8,8 +8,7 @@ import arrow.fx.extensions.io.applicativeError.attempt
 import arrow.fx.extensions.io.concurrent.concurrent
 import arrow.fx.extensions.io.unsafeRun.runBlocking
 import arrow.unsafe
-import com.github.jorgecastillo.kotlinandroid.io.algebras.business.model.NewsItem
-import com.github.jorgecastillo.kotlinandroid.io.algebras.data.network.error.NetworkError
+import com.github.jorgecastillo.kotlinandroid.io.algebras.business.model.Article
 import com.github.jorgecastillo.kotlinandroid.io.runtime.context.Runtime
 import com.github.jorgecastillo.kotlinandroid.io.runtime.context.RuntimeContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,6 +23,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import arrow.core.Either
+import com.github.jorgecastillo.kotlinandroid.io.algebras.data.ServerError
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 @ExperimentalCoroutinesApi
@@ -46,7 +46,7 @@ class NetworkServiceIntegrationTests {
             httpClient)
 
         val testDispatcher = TestCoroutineDispatcher()
-        val runtimeContext = RuntimeContext(testDispatcher, testDispatcher, service)
+        val runtimeContext = RuntimeContext(testDispatcher, testDispatcher, testDispatcher, service)
 
         runtime = object : Runtime<ForIO>(IO.concurrent(), runtimeContext) {}
     }
@@ -104,7 +104,7 @@ class NetworkServiceIntegrationTests {
             .thenRespond(error(code = 500))
 
         unsafe {
-            val res: Either<Throwable, List<NewsItem>> = runBlocking {
+            val res: Either<Throwable, List<Article>> = runBlocking {
                 val op = runtime.loadNews().attempt()
                 op.map {
                     it.fold(
@@ -114,7 +114,7 @@ class NetworkServiceIntegrationTests {
                 }
             }
 
-            res eq NetworkError.ServerError.left()
+            res eq ServerError.UnknownServerError.left()
         }
     }
 
@@ -124,7 +124,7 @@ class NetworkServiceIntegrationTests {
             .thenRespond(error(code = 401))
 
         unsafe {
-            val res: Either<Throwable, List<NewsItem>> = runBlocking {
+            val res: Either<Throwable, List<Article>> = runBlocking {
                 val op = runtime.loadNews().attempt()
                 op.map {
                     it.fold(
@@ -134,7 +134,7 @@ class NetworkServiceIntegrationTests {
                 }
             }
 
-            res eq NetworkError.Unauthorized.left()
+            res eq ServerError.UserIsUnauthorized.left()
         }
     }
 
@@ -144,7 +144,7 @@ class NetworkServiceIntegrationTests {
             .thenRespond(success(jsonBody = fileBody("GetNews.json")))
 
         unsafe {
-            val res: Either<Throwable, NewsItem> = runBlocking {
+            val res: Either<Throwable, Article> = runBlocking {
                 val op = runtime.loadNewsItemDetails("Some not present title").attempt()
                 op.map {
                     it.fold(
@@ -154,12 +154,12 @@ class NetworkServiceIntegrationTests {
                 }
             }
 
-            res eq NetworkError.NotFound.left()
+            res eq ServerError.ArticleNotInRemoteStorage.left()
         }
     }
 
-    private fun expectedNews(): List<NewsItem> = listOf(
-        NewsItem(
+    private fun expectedNews(): List<Article> = listOf(
+        Article(
             "Lifehacker.com",
             "Jacob Kleinman",
             "How to Get Android P's Screenshot Editing Tool on Any Android Phone",
@@ -169,7 +169,7 @@ class NetworkServiceIntegrationTests {
             "2018-03-09T20:30:00Z",
             "Last year, Apple brought advanced screenshot editing tools to the iPhone with iOS 11, and, this week, Google fired back with a similar Android feature called Markup. The only catch is that this new tool is limited to Android P, which launches later this year and a bunch more content!"
         ),
-        NewsItem(
+        Article(
             "Engadget",
             "Devindra Hardawar",
             "Capital One's virtual credit cards could help you avoid fraud",
@@ -179,7 +179,7 @@ class NetworkServiceIntegrationTests {
             "2018-03-09T13:00:00Z",
             "Capital One is no stranger to trying new things -- especially when it comes to technology. Its Eno texting chatbot, for example, is a quick and conversational way for its customers to check their balances and perform simple tasks, like checking on recent and a bunch more content!"
         ),
-        NewsItem(
+        Article(
             "TechCrunch",
             "Alex Wilhelm",
             "Magic Leap gets $461M more, Travis goes VC, and HQ Trivia scales up",

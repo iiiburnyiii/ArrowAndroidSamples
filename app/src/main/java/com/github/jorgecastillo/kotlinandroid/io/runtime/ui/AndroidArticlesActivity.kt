@@ -3,9 +3,11 @@ package com.github.jorgecastillo.kotlinandroid.io.runtime.ui
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import arrow.fx.IO
 import arrow.fx.extensions.io.unsafeRun.runNonBlocking
+import arrow.integrations.kotlinx.suspendCancellable
 import arrow.unsafe
 import com.github.jorgecastillo.kotlinandroid.R
 import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.NewsListView
@@ -17,6 +19,7 @@ import com.github.jorgecastillo.kotlinandroid.io.runtime.application
 import com.github.jorgecastillo.kotlinandroid.io.runtime.context.runtime
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.launch
 
 class AndroidNewsListActivity : AppCompatActivity(), NewsListView {
 
@@ -47,10 +50,9 @@ class AndroidNewsListActivity : AppCompatActivity(), NewsListView {
 
     override fun onResume() {
         super.onResume()
-        unsafe {
-            runNonBlocking({
-                IO.runtime(application().runtimeContext).getAllNews(this@AndroidNewsListActivity)
-            }, {})
+
+        lifecycleScope.launch {
+            IO.runtime(application().runtimeContext).getAllNews(this@AndroidNewsListActivity).suspendCancellable()
         }
     }
 

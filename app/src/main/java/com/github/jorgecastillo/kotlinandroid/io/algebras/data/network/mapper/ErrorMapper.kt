@@ -1,13 +1,15 @@
 package com.github.jorgecastillo.kotlinandroid.io.algebras.data.network.mapper
 
-import com.github.jorgecastillo.kotlinandroid.io.algebras.data.network.error.NetworkError
+import com.github.jorgecastillo.kotlinandroid.io.algebras.data.ServerError
+import retrofit2.HttpException
 
-fun Int.toNetworkError() = when (this) {
-    401 -> NetworkError.Unauthorized
-    else -> NetworkError.ServerError
+fun Throwable.normalizeToNetworkError() = when (this) {
+    is ServerError -> this
+    is HttpException -> toNetworkError()
+    else -> ServerError.UnknownServerError
 }
 
-fun Throwable.normalizeError() = when (this) {
-    is NetworkError -> this
-    else -> NetworkError.ServerError
+private fun HttpException.toNetworkError() = when (this.code()) {
+    401 -> ServerError.UserIsUnauthorized
+    else -> ServerError.UnknownServerError
 }

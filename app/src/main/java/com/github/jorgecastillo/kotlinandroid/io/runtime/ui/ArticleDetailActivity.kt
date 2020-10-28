@@ -6,19 +6,23 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import arrow.fx.IO
 import arrow.fx.extensions.io.unsafeRun.runNonBlocking
+import arrow.integrations.kotlinx.suspendCancellable
 import arrow.unsafe
 import com.github.jorgecastillo.kotlinandroid.R
 import com.github.jorgecastillo.kotlinandroid.R.string
 import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.NewsItemDetailView
 import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.extensions.loadImageAsync
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.getAllNews
 import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.getNewsItemDetails
 import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model.NewsItemViewState
 import com.github.jorgecastillo.kotlinandroid.io.runtime.application
 import com.github.jorgecastillo.kotlinandroid.io.runtime.context.runtime
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_detail.*
+import kotlinx.coroutines.launch
 
 class NewsItemDetailActivity : AppCompatActivity(), NewsItemDetailView {
 
@@ -53,12 +57,11 @@ class NewsItemDetailActivity : AppCompatActivity(), NewsItemDetailView {
     }
 
     private fun loadNewsItemDetails(title: String) {
-        unsafe {
-            runNonBlocking({
-                IO.runtime(application().runtimeContext).getNewsItemDetails(
-                    title,
-                    this@NewsItemDetailActivity)
-            }, {})
+        lifecycleScope.launch {
+            IO.runtime(application().runtimeContext).getNewsItemDetails(
+                    title = title,
+                    view = this@NewsItemDetailActivity
+            ).suspendCancellable()
         }
     }
 
