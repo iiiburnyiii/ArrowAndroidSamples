@@ -8,23 +8,20 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import arrow.fx.IO
-import arrow.fx.extensions.io.unsafeRun.runNonBlocking
 import arrow.integrations.kotlinx.suspendCancellable
-import arrow.unsafe
 import com.github.jorgecastillo.kotlinandroid.R
 import com.github.jorgecastillo.kotlinandroid.R.string
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.NewsItemDetailView
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.ArticlesItemDetailView
 import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.extensions.loadImageAsync
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.getAllNews
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.getNewsItemDetails
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model.NewsItemViewState
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.getArticleDetails
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model.ArticleViewState
 import com.github.jorgecastillo.kotlinandroid.io.runtime.application
 import com.github.jorgecastillo.kotlinandroid.io.runtime.context.runtime
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_detail.*
 import kotlinx.coroutines.launch
 
-class NewsItemDetailActivity : AppCompatActivity(), NewsItemDetailView {
+class ArticleDetailActivity : AppCompatActivity(), ArticlesItemDetailView {
 
     companion object {
         const val EXTRA_NEWS_ID = "EXTRA_ID"
@@ -33,7 +30,7 @@ class NewsItemDetailActivity : AppCompatActivity(), NewsItemDetailView {
             source: Context,
             newsId: String
         ) {
-            val intent = Intent(source, NewsItemDetailActivity::class.java)
+            val intent = Intent(source, ArticleDetailActivity::class.java)
             intent.putExtra(EXTRA_NEWS_ID, newsId)
             source.startActivity(intent)
         }
@@ -58,9 +55,9 @@ class NewsItemDetailActivity : AppCompatActivity(), NewsItemDetailView {
 
     private fun loadNewsItemDetails(title: String) {
         lifecycleScope.launch {
-            IO.runtime(application().runtimeContext).getNewsItemDetails(
+            IO.runtime(application().runtimeContext).getArticleDetails(
                     title = title,
-                    view = this@NewsItemDetailActivity
+                    view = this@ArticleDetailActivity
             ).suspendCancellable()
         }
     }
@@ -77,10 +74,10 @@ class NewsItemDetailActivity : AppCompatActivity(), NewsItemDetailView {
         loader.visibility = View.GONE
     }
 
-    override fun drawNewsItem(newsItem: NewsItemViewState) {
-        collapsingToolbar.title = newsItem.title
-        description.text = newsItem.description ?: getString(string.empty_description)
-        newsItem.photoUrl?.let { url -> headerImage.loadImageAsync(url) }
+    override fun drawArticle(article: ArticleViewState) {
+        collapsingToolbar.title = article.title
+        description.text = article.description ?: getString(string.empty_description)
+        article.photoUrl?.let { url -> headerImage.loadImageAsync(url) }
     }
 
     override fun showNotFoundError() {

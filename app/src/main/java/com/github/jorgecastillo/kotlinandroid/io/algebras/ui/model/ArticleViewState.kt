@@ -2,7 +2,7 @@ package com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model
 
 import java.util.*
 
-data class NewsItemViewState(
+data class ArticleViewState(
     val title: String,
     val author: String?,
     val photoUrl: String?,

@@ -6,24 +6,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import arrow.fx.IO
-import arrow.fx.extensions.io.unsafeRun.runNonBlocking
 import arrow.integrations.kotlinx.suspendCancellable
-import arrow.unsafe
 import com.github.jorgecastillo.kotlinandroid.R
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.NewsListView
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.adapter.NewsRecyclerAdapter
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.getAllNews
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model.NewsItemViewState
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.onNewsItemClick
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.ArticlesListView
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.adapter.ArticlesAdapter
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.getAllArticles
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model.ArticleViewState
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.onArticleClick
 import com.github.jorgecastillo.kotlinandroid.io.runtime.application
 import com.github.jorgecastillo.kotlinandroid.io.runtime.context.runtime
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 
-class AndroidNewsListActivity : AppCompatActivity(), NewsListView {
+class AndroidArticlesActivity : AppCompatActivity(), ArticlesListView {
 
-    private lateinit var adapter: NewsRecyclerAdapter
+    private lateinit var adapter: ArticlesAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,17 +32,17 @@ class AndroidNewsListActivity : AppCompatActivity(), NewsListView {
     private fun setupList() {
         newsList.setHasFixedSize(true)
         newsList.layoutManager = LinearLayoutManager(this)
-        adapter = NewsRecyclerAdapter(itemClick = onNewsItemClick())
+        adapter = ArticlesAdapter(itemClick = onArticleClick())
         newsList.adapter = adapter
     }
 
-    private fun onNewsItemClick() = { newsItemViewState: NewsItemViewState ->
-        unsafe {
-            runNonBlocking({
-                IO.runtime(application().runtimeContext).onNewsItemClick(
-                        this@AndroidNewsListActivity,
-                        newsItemViewState.title)
-            }, {})
+    private fun onArticleClick(): (ArticleViewState) -> Unit = { articleViewState: ArticleViewState ->
+        lifecycleScope.launch {
+            IO.runtime(application().runtimeContext)
+                    .onArticleClick(
+                            ctx = this@AndroidArticlesActivity,
+                            title = articleViewState.title
+                    ).suspendCancellable()
         }
     }
 
@@ -52,7 +50,8 @@ class AndroidNewsListActivity : AppCompatActivity(), NewsListView {
         super.onResume()
 
         lifecycleScope.launch {
-            IO.runtime(application().runtimeContext).getAllNews(this@AndroidNewsListActivity).suspendCancellable()
+            IO.runtime(application().runtimeContext)
+                    .getAllArticles(view = this@AndroidArticlesActivity).suspendCancellable()
         }
     }
 
@@ -64,7 +63,7 @@ class AndroidNewsListActivity : AppCompatActivity(), NewsListView {
         loader.visibility = View.GONE
     }
 
-    override fun drawNews(news: List<NewsItemViewState>) {
+    override fun drawArticles(news: List<ArticleViewState>) {
         adapter.news = news
         adapter.notifyDataSetChanged()
     }

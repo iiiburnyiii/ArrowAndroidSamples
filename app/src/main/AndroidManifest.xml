@@ -16,7 +16,7 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:targetApi="n">
 
-        <activity android:name="com.github.jorgecastillo.kotlinandroid.io.runtime.ui.AndroidNewsListActivity">
+        <activity android:name="com.github.jorgecastillo.kotlinandroid.io.runtime.ui.AndroidArticlesActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -24,7 +24,7 @@
         </activity>
 
         <activity
-            android:name="com.github.jorgecastillo.kotlinandroid.io.runtime.ui.NewsItemDetailActivity"
+            android:name="com.github.jorgecastillo.kotlinandroid.io.runtime.ui.ArticleDetailActivity"
             android:theme="@style/NoActionBar" />
     </application>
 </manifest>

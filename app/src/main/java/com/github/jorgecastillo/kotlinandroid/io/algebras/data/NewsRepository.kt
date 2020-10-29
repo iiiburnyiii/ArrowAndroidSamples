@@ -18,7 +18,7 @@ sealed class CachePolicy {
     object LocalFirst : CachePolicy()
 }
 
-fun <F> Runtime<F>.getNewsWithCachePolicy(policy: CachePolicy): Kind<F, Articles> =
+fun <F> Runtime<F>.getArticlesWithCachePolicy(policy: CachePolicy): Kind<F, Articles> =
     when (policy) {
         NetworkOnly -> loadNews()
         NetworkFirst -> loadNews().flatTap(this::populateLocalStorage)
@@ -31,7 +31,7 @@ fun <F> Runtime<F>.getNewsWithCachePolicy(policy: CachePolicy): Kind<F, Articles
         }
     }
 
-fun <F> Runtime<F>.getNewsItemDetailsWithCachePolicy(policy: CachePolicy, title: String): Kind<F, Article> =
+fun <F> Runtime<F>.getArticleDetailsWithCachePolicy(policy: CachePolicy, title: String): Kind<F, Article> =
     when (policy) {
         NetworkOnly -> loadNewsItemDetails(title)
         NetworkFirst -> loadNewsItemDetails(title).flatTap { article ->

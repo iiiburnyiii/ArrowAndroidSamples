@@ -4,13 +4,13 @@ import android.content.Context
 import android.util.Log
 import arrow.Kind
 import com.github.jorgecastillo.kotlinandroid.io.algebras.business.getNews
-import com.github.jorgecastillo.kotlinandroid.io.algebras.business.getNewsItemDetails
+import com.github.jorgecastillo.kotlinandroid.io.algebras.business.getArticleDetails
 import com.github.jorgecastillo.kotlinandroid.io.algebras.business.model.Article
 import com.github.jorgecastillo.kotlinandroid.io.algebras.business.model.DomainError
-import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model.NewsItemViewState
+import com.github.jorgecastillo.kotlinandroid.io.algebras.ui.model.ArticleViewState
 import com.github.jorgecastillo.kotlinandroid.io.runtime.context.Runtime
 
-interface NewsView {
+interface ArticlesView {
 
     fun showLoading(): Unit
 
@@ -23,14 +23,14 @@ interface NewsView {
     fun showAuthenticationError(): Unit
 }
 
-interface NewsListView : NewsView {
+interface ArticlesListView : ArticlesView {
 
-    fun drawNews(news: List<NewsItemViewState>): Unit
+    fun drawArticles(news: List<ArticleViewState>): Unit
 }
 
-interface NewsItemDetailView : NewsView {
+interface ArticlesItemDetailView : ArticlesView {
 
-    fun drawNewsItem(newsItem: NewsItemViewState)
+    fun drawArticle(article: ArticleViewState)
 }
 
 /**
@@ -38,15 +38,15 @@ interface NewsItemDetailView : NewsView {
  * type. We'll end up running these methods using a valid F type that support Concurrent behaviors,
  * like IO.
  */
-fun <F> Runtime<F>.onNewsItemClick(
+fun <F> Runtime<F>.onArticleClick(
     ctx: Context,
     title: String
 ): Kind<F, Unit> =
     goToNewsItemDetail(ctx, title)
 
 private fun displayErrors(
-    view: NewsView,
-    t: Throwable
+        view: ArticlesView,
+        t: Throwable
 ): Unit {
     when (DomainError.fromThrowable(t)) {
         is DomainError.NotFoundError -> view.showNotFoundError()
@@ -56,7 +56,7 @@ private fun displayErrors(
     }
 }
 
-fun <F> Runtime<F>.getAllNews(view: NewsListView): Kind<F, Unit> = bindingConcurrent {
+fun <F> Runtime<F>.getAllArticles(view: ArticlesListView): Kind<F, Unit> = bindingConcurrent {
     !effect { view.showLoading() }
     val maybeNews = !getNews().attempt()
     continueOn(ctx.mainDispatcher)
@@ -69,29 +69,29 @@ fun <F> Runtime<F>.getAllNews(view: NewsListView): Kind<F, Unit> = bindingConcur
             },
             ifRight = {
                 Log.d("Pres", "News: $it")
-                view.drawNews(it.map { newsItem -> newsItem.toViewState() })
+                view.drawArticles(it.map { newsItem -> newsItem.toViewState() })
             }
         )
     }
 }
 
-fun <F> Runtime<F>.getNewsItemDetails(
+fun <F> Runtime<F>.getArticleDetails(
     title: String,
-    view: NewsItemDetailView
+    view: ArticlesItemDetailView
 ): Kind<F, Unit> = bindingConcurrent {
     !effect { view.showLoading() }
-    val maybeNewsItem = !getNewsItemDetails(title).attempt()
+    val maybeNewsItem = !getArticleDetails(title).attempt()
     continueOn(ctx.mainDispatcher)
     !effect { view.hideLoading() }
     !effect {
         maybeNewsItem.fold(
             ifLeft = { displayErrors(view, it) },
-            ifRight = { newsItem -> view.drawNewsItem(newsItem.toViewState()) }
+            ifRight = { newsItem -> view.drawArticle(newsItem.toViewState()) }
         )
     }
 }
 
-fun Article.toViewState() = NewsItemViewState(
+fun Article.toViewState() = ArticleViewState(
     title = title,
     author = author,
     photoUrl = urlToImage,
